@@ -12,24 +12,28 @@ namespace TheKnight
 {
     public partial class Settings : Form
     {
-        private readonly Form1 form1;
-        public Settings(Form1 form1)
+        private readonly Game game;
+        public Settings(Game game)
         {
-            this.form1 = form1;
+            this.game = game;
             InitializeComponent();
         }
 
         private void button1_Click(object sender, EventArgs e)
         {
-            int newBoardSize = 0;
+            short newBoardSize = 0;
             if (checkBox1.Checked)
                 newBoardSize = 8;
             else if (checkBox2.Checked)
                 newBoardSize = 10;
             else if (checkBox3.Checked)
                 newBoardSize = 12;
-            form1.RecreateBoard(newBoardSize);
-            Dispose();
+
+            if (newBoardSize != 0)
+            {
+                game.RecreateBoard(newBoardSize);
+                Dispose();
+            }
         }
 
         private void button2_Click(object sender, EventArgs e)
