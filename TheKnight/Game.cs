@@ -39,10 +39,12 @@ namespace TheKnight
             gameBoardLayout.CellPaint += ColorBoard;
 
             scenery = new Scenery();
-            var knightSpawn = scenery.FindKnightSpawn();
+            var knightSpawn = scenery.GetKnightSpawn();
 
             knight = new Knight(knightSpawn);
             DrawKnight();
+            DrawKey();
+            DrawDoor();
         }
 
         private void HandleSplashScreen()
@@ -128,12 +130,20 @@ namespace TheKnight
 
         private void newGameToolStripMenuItem_Click(object sender, EventArgs e)
         {
+            RemoveKey();
+            RemoveDoor();
+
             scenery.GenerateRandomColors();
-            var knightSpawn = scenery.FindKnightSpawn();
+
+            DrawKey();
+            DrawDoor();
+
+            var knightSpawn = scenery.GetKnightSpawn();
 
             RemoveKnight();
             knight.SetPosition(knightSpawn);
             DrawKnight();
+
 
             gameBoardLayout.Invalidate();
         }
@@ -183,7 +193,7 @@ namespace TheKnight
             }
 
             scenery.SetBoardSize(newBoardSize);
-            var knightSpawn = scenery.FindKnightSpawn();
+            var knightSpawn = scenery.GetKnightSpawn();
 
             RemoveKnight();
             knight.SetPosition(knightSpawn);
@@ -210,6 +220,65 @@ namespace TheKnight
 
             cellControl.BackgroundImage = null;
         }
+
+        private void DrawKey()
+        {
+            var keyPosition = scenery.GetKeySpawn();
+            if (keyPosition == null)
+                return;
+
+            var cellControl = gameBoardLayout.GetControlFromPosition(keyPosition.X, keyPosition.Y);
+            var cellGraphics = cellControl.CreateGraphics();
+
+            var keyImage = Resources.key2;
+
+            keyImage.MakeTransparent();
+            cellControl.Anchor = AnchorStyles.None;
+            cellControl.BackgroundImage = keyImage;
+            cellControl.BackgroundImageLayout = ImageLayout.Stretch | ImageLayout.Center;
+        }
+
+        private void RemoveKey()
+        {
+            var keyPosition = scenery.GetKeySpawn();
+            if (keyPosition == null)
+                return;
+
+            var cellControl = gameBoardLayout.GetControlFromPosition(keyPosition.X, keyPosition.Y);
+            var cellGraphics = cellControl.CreateGraphics();
+
+            cellControl.BackgroundImage = null;
+        }
+
+        private void DrawDoor(bool opened = true)
+        {
+            var doorPosition = scenery.GetDoorSpawn();
+            if (doorPosition == null)
+                return;
+
+            var cellControl = gameBoardLayout.GetControlFromPosition(doorPosition.X, doorPosition.Y);
+            var cellGraphics = cellControl.CreateGraphics();
+
+            var doorImage = opened ? Resources.opened_door : Resources.closed_door;
+
+            doorImage.MakeTransparent();
+            cellControl.Anchor = AnchorStyles.None;
+            cellControl.BackgroundImage = doorImage;
+            cellControl.BackgroundImageLayout = ImageLayout.Stretch | ImageLayout.Center;
+        }
+
+        private void RemoveDoor()
+        {
+            var doorPosition = scenery.GetDoorSpawn();
+            if (doorPosition == null)
+                return;
+
+            var cellControl = gameBoardLayout.GetControlFromPosition(doorPosition.X, doorPosition.Y);
+            var cellGraphics = cellControl.CreateGraphics();
+
+            cellControl.BackgroundImage = null;
+        }
+
 
         private bool IsPositionValid(Position position)
         {

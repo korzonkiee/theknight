@@ -10,6 +10,11 @@ namespace TheKnight
     {
         private short defaultBoardSize = 8;
         public short BoardSize { get; set; }
+        private List<Position> availablePositions = new List<Position>();
+
+        private Position KeySpawn;
+        private Position DoorSpawn;
+        private Position KnightSpawn;
 
         public SceneryElement[,] Board;
 
@@ -31,19 +36,43 @@ namespace TheKnight
 
         public void GenerateRandomColors()
         {
+            availablePositions.Clear();
+
             var random = new Random();
             var sceneryElements = Enum.GetValues(typeof(SceneryElement));
 
-            for (int i = 0; i < BoardSize; i++)
+            for (short i = 0; i < BoardSize; i++)
             {
-                for (int j = 0; j < BoardSize; j++)
+                for (short j = 0; j < BoardSize; j++)
                 {
                     var randomSceneryElement = (SceneryElement) sceneryElements.
                         GetValue(random.Next(sceneryElements.Length));
 
+                    if (randomSceneryElement == SceneryElement.Grass)
+                        availablePositions.Add(new Position(i, j));
+
                     Board[i, j] = randomSceneryElement;
                 }
             }
+
+            ApplyRandomPosition(ref KnightSpawn);
+            ApplyRandomPosition(ref KeySpawn);
+            ApplyRandomPosition(ref DoorSpawn);
+        }
+
+        public Position GetKnightSpawn()
+        {
+            return KnightSpawn;
+        }
+
+        public Position GetKeySpawn()
+        {
+            return KeySpawn;
+        }
+
+        public Position GetDoorSpawn()
+        {
+            return DoorSpawn;
         }
 
         public bool NotAvailablePosition(Position position)
@@ -51,18 +80,17 @@ namespace TheKnight
             return Board[position.X, position.Y] == SceneryElement.Wall;
         }
 
-        public Position FindKnightSpawn()
+        private void ApplyRandomPosition(ref Position position)
         {
-            for (short i = 0; i < BoardSize; i++)
-            {
-                for (short j = 0; j < BoardSize; j++)
-                {
-                    if (Board[i, j] == SceneryElement.Grass)
-                        return new Position(i, j);
-                }
-            }
+            var random = new Random();
+            var randomIndex = random.Next(availablePositions.Count);
 
-            return null;
+            var randomPosition = availablePositions
+                .ElementAt(randomIndex);
+
+            availablePositions.RemoveAt(randomIndex);
+
+            position = randomPosition;
         }
     }
 

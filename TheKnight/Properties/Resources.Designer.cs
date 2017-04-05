@@ -63,6 +63,26 @@ namespace TheKnight.Properties {
         /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
+        internal static System.Drawing.Bitmap closed_door {
+            get {
+                object obj = ResourceManager.GetObject("closed_door", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap key2 {
+            get {
+                object obj = ResourceManager.GetObject("key2", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
         internal static System.Drawing.Bitmap knight_left {
             get {
                 object obj = ResourceManager.GetObject("knight_left", resourceCulture);
@@ -76,6 +96,16 @@ namespace TheKnight.Properties {
         internal static System.Drawing.Bitmap knight_right {
             get {
                 object obj = ResourceManager.GetObject("knight_right", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap opened_door {
+            get {
+                object obj = ResourceManager.GetObject("opened_door", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }
