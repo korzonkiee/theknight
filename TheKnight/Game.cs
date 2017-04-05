@@ -31,12 +31,15 @@ namespace TheKnight
             gameBoardLayout.CellPaint += ColorBoard;
 
             scenery = new Scenery();
-            knight = new Knight();
+            var knightSpawn = scenery.FindKnightSpawn();
+
+            knight = new Knight(knightSpawn);
             DrawKnight();
         }
 
         private void KnightWalkHandler(object sender, KeyEventArgs e)
         {
+
             if (e.KeyValue != (char)Keys.Up && e.KeyValue != (char)Keys.Right && e.KeyValue != (char)Keys.Left && e.KeyValue != (char)Keys.Down)
                 return;
 
@@ -101,6 +104,12 @@ namespace TheKnight
         private void newGameToolStripMenuItem_Click(object sender, EventArgs e)
         {
             scenery.GenerateRandomColors();
+            var knightSpawn = scenery.FindKnightSpawn();
+
+            RemoveKnight();
+            knight.SetPosition(knightSpawn);
+            DrawKnight();
+
             gameBoardLayout.Invalidate();
         }
 
@@ -149,6 +158,12 @@ namespace TheKnight
             }
 
             scenery.SetBoardSize(newBoardSize);
+            var knightSpawn = scenery.FindKnightSpawn();
+
+            RemoveKnight();
+            knight.SetPosition(knightSpawn);
+            DrawKnight();
+
             gameBoardLayout.Invalidate();
         }
         

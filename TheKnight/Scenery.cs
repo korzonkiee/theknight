@@ -50,6 +50,20 @@ namespace TheKnight
         {
             return Board[position.X, position.Y] == SceneryElement.Wall;
         }
+
+        public Position FindKnightSpawn()
+        {
+            for (short i = 0; i < BoardSize; i++)
+            {
+                for (short j = 0; j < BoardSize; j++)
+                {
+                    if (Board[i, j] == SceneryElement.Grass)
+                        return new Position(i, j);
+                }
+            }
+
+            return null;
+        }
     }
 
     public enum SceneryElement

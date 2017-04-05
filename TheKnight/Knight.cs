@@ -20,6 +20,12 @@ namespace TheKnight
             Position = new Position(0, 0);
         }
 
+        public Knight(Position initialPosition)
+        {
+            Image = Resources.knight_right;
+            Position = initialPosition;
+        }
+
         public void SetPosition(Position position, Walk walk = Walk.None)
         {
             Position = position;
