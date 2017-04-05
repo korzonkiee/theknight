@@ -17,6 +17,7 @@ namespace TheKnight
         {
             this.game = game;
             InitializeComponent();
+            ShowInTaskbar = false;
         }
 
         private void button1_Click(object sender, EventArgs e)

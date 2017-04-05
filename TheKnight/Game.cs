@@ -5,6 +5,7 @@ using System.Data;
 using System.Drawing;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using TheKnight.Properties;
@@ -16,10 +17,17 @@ namespace TheKnight
 
         private Scenery scenery;
         private Knight knight;
+        private SplashScreen splashScreen;
 
         public Game()
         {
+            HandleSplashScreen();
+
+            //nie wiem jak inaczej xd
+            TopMost = true;
             InitializeComponent();
+            ResumeLayout(true);
+
             this.Text = "The Knight";
             this.Size = new Size(400, 400);
             this.FormBorderStyle = FormBorderStyle.FixedSingle;
@@ -35,6 +43,23 @@ namespace TheKnight
 
             knight = new Knight(knightSpawn);
             DrawKnight();
+        }
+
+        private void HandleSplashScreen()
+        {
+            splashScreen = new SplashScreen();
+            Thread thread = new Thread(new ThreadStart(SplashStart));
+            thread.Start();
+
+            Thread.Sleep(3000);
+
+            thread.Abort();
+            splashScreen.Dispose();
+        }
+
+        private void SplashStart()
+        {
+            Application.Run(splashScreen);
         }
 
         private void KnightWalkHandler(object sender, KeyEventArgs e)
