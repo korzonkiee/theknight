@@ -44,7 +44,7 @@ namespace TheKnight
             knight = new Knight(knightSpawn);
             DrawKnight();
             DrawKey();
-            DrawDoor();
+            DrawDoor(false);
         }
 
         private void HandleSplashScreen()
@@ -56,7 +56,6 @@ namespace TheKnight
             Thread.Sleep(3000);
 
             thread.Abort();
-            splashScreen.Dispose();
         }
 
         private void SplashStart()
@@ -98,9 +97,29 @@ namespace TheKnight
 
             if (IsPositionValid(potentialPosition))
             {
-                RemoveKnight();
-                knight.SetPosition(potentialPosition, walk);
-                DrawKnight();
+                if (IsKeySpawn(potentialPosition))
+                {
+                    knight.HasKey = true;
+                    DrawDoor(); //Draw closed doors;
+                }
+                if (IsOpenedDoorSpawn(potentialPosition))
+                {
+                    knight.HasKey = false;
+                    RemoveDoor();
+                    RemoveKnight();
+                    scenery.GenerateRandomColors();
+                    knight = new Knight(scenery.GetKnightSpawn());
+                    DrawKnight();
+                    DrawKey();
+                    DrawDoor();
+                    gameBoardLayout.Invalidate();
+                }
+                else
+                {
+                    RemoveKnight();
+                    knight.SetPosition(potentialPosition, walk);
+                    DrawKnight();
+                }
             }
 
         }
@@ -136,7 +155,7 @@ namespace TheKnight
             scenery.GenerateRandomColors();
 
             DrawKey();
-            DrawDoor();
+            DrawDoor(false);
 
             var knightSpawn = scenery.GetKnightSpawn();
 
@@ -224,8 +243,6 @@ namespace TheKnight
         private void DrawKey()
         {
             var keyPosition = scenery.GetKeySpawn();
-            if (keyPosition == null)
-                return;
 
             var cellControl = gameBoardLayout.GetControlFromPosition(keyPosition.X, keyPosition.Y);
             var cellGraphics = cellControl.CreateGraphics();
@@ -241,9 +258,6 @@ namespace TheKnight
         private void RemoveKey()
         {
             var keyPosition = scenery.GetKeySpawn();
-            if (keyPosition == null)
-                return;
-
             var cellControl = gameBoardLayout.GetControlFromPosition(keyPosition.X, keyPosition.Y);
             var cellGraphics = cellControl.CreateGraphics();
 
@@ -253,8 +267,6 @@ namespace TheKnight
         private void DrawDoor(bool opened = true)
         {
             var doorPosition = scenery.GetDoorSpawn();
-            if (doorPosition == null)
-                return;
 
             var cellControl = gameBoardLayout.GetControlFromPosition(doorPosition.X, doorPosition.Y);
             var cellGraphics = cellControl.CreateGraphics();
@@ -270,8 +282,6 @@ namespace TheKnight
         private void RemoveDoor()
         {
             var doorPosition = scenery.GetDoorSpawn();
-            if (doorPosition == null)
-                return;
 
             var cellControl = gameBoardLayout.GetControlFromPosition(doorPosition.X, doorPosition.Y);
             var cellGraphics = cellControl.CreateGraphics();
@@ -285,17 +295,34 @@ namespace TheKnight
             // Out of board bounds
             if (position.X < 0 || position.Y < 0 ||
                 position.X >= scenery.BoardSize || position.Y >= scenery.BoardSize)
-            {
                 return false;
-            }
 
             // Stepped at not available position
             if (scenery.NotAvailablePosition(position))
-            {
                 return false;
-            }
+
+            if (position == scenery.GetDoorSpawn() && !knight.HasKey)
+                return false;
 
             return true;
+        }
+
+        private bool IsKeySpawn(Position position)
+        {
+            var keySpawn = scenery.GetKeySpawn();
+
+            if (position == keySpawn)
+                return true;
+            return false;
+        }
+
+        private bool IsOpenedDoorSpawn(Position position)
+        {
+            var doorSpawn = scenery.GetDoorSpawn();
+
+            if (position == doorSpawn && knight.HasKey)
+                return true;
+            return false;
         }
     }
 }

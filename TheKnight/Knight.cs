@@ -14,6 +14,8 @@ namespace TheKnight
 
         public Bitmap Image { get; private set; }
 
+        public bool HasKey { get; set; } = false;
+
         public Knight()
         {
             Image = Resources.knight_right;
@@ -84,6 +86,16 @@ namespace TheKnight
             }
 
             return newPosition;
+        }
+
+        public static bool operator ==(Position p1, Position p2)
+        {
+            return p1.X == p2.X && p1.Y == p2.Y;
+        }
+
+        public static bool operator !=(Position p1, Position p2)
+        {
+            return p1.X != p2.X || p1.Y != p2.Y;
         }
     }
 }

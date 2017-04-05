@@ -65,9 +65,9 @@ namespace TheKnight
         {
             base.OnLoad(e);
 
-            Opacity = 0;
-            FadeIn(this, 30);
-            FadeOut(this, 30);
+            //Opacity = 0;
+            //FadeIn(this, 30);
+            //FadeOut(this, 30);
         }
 
         private async void FadeIn(Form o, int interval = 80)
