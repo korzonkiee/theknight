@@ -14,7 +14,6 @@ namespace TheKnight
 {
     public partial class Game : Form
     {
-
         private Scenery scenery;
         private Knight knight;
         private SplashScreen splashScreen;
@@ -34,17 +33,17 @@ namespace TheKnight
             this.MaximizeBox = true;
             this.MinimizeBox = true;
             this.CenterToScreen();
-
-            KeyDown += new KeyEventHandler(KnightWalkHandler);
-            gameBoardLayout.CellPaint += ColorBoard;
-
+            
             scenery = new Scenery();
             var knightSpawn = scenery.GetKnightSpawn();
-
             knight = new Knight(knightSpawn);
+            RecreateBoard(scenery.BoardSize);
+
             DrawKnight();
             DrawKey();
             DrawDoor(false);
+
+            KeyDown += new KeyEventHandler(KnightWalkHandler);
         }
 
         private void HandleSplashScreen()
@@ -66,7 +65,7 @@ namespace TheKnight
         private void KnightWalkHandler(object sender, KeyEventArgs e)
         {
 
-            if (e.KeyValue != (char)Keys.Up && e.KeyValue != (char)Keys.Right && e.KeyValue != (char)Keys.Left && e.KeyValue != (char)Keys.Down)
+            if (e.KeyValue != (char)Keys.Space && e.KeyValue != (char)Keys.Up && e.KeyValue != (char)Keys.Right && e.KeyValue != (char)Keys.Left && e.KeyValue != (char)Keys.Down)
                 return;
 
             Walk walk = Walk.None;
@@ -87,6 +86,10 @@ namespace TheKnight
 
             case (char)Keys.Left:
                 walk = Walk.Left;
+                break;
+
+            case (char)Keys.Space:
+                DestroyWalls();
                 break;
 
             default:
@@ -111,8 +114,8 @@ namespace TheKnight
                     knight = new Knight(scenery.GetKnightSpawn());
                     DrawKnight();
                     DrawKey();
-                    DrawDoor();
-                    gameBoardLayout.Invalidate();
+                    DrawDoor(false);
+                    ColorBoard();
                 }
                 else
                 {
@@ -124,27 +127,27 @@ namespace TheKnight
 
         }
 
-        private void ColorBoard(object sender, TableLayoutCellPaintEventArgs e)
+        private void ColorBoard()
         {
-            var control = gameBoardLayout.GetControlFromPosition(e.Column, e.Row);
-
-            if (control != null)
+            for (int i = 0; i < scenery.BoardSize; i++)
             {
-                var graphics = e.Graphics;
-                
-                if (scenery.Board[e.Column, e.Row] == SceneryElement.Grass)
+                for (int j = 0; j < scenery.BoardSize; j++)
                 {
-                    graphics.FillRectangle(Brushes.ForestGreen, e.CellBounds);
-                    control.BackColor = Color.ForestGreen;
-                }
-                else if (scenery.Board[e.Column, e.Row] == SceneryElement.Wall)
-                {
-                    graphics.FillRectangle(Brushes.Maroon, e.CellBounds);
-                    control.BackColor = Color.Maroon;
-                }
+                    var control = gameBoardLayout.GetControlFromPosition(i, j);
 
+                    if (control != null)
+                    {
+                        if (scenery.Board[i, j] == SceneryElement.Grass)
+                        {
+                            (control as PictureBox).BackColor = Color.ForestGreen;
+                        }
+                        else if (scenery.Board[i, j] == SceneryElement.Wall)
+                        {
+                            (control as PictureBox).BackColor = Color.Maroon;
+                        }
+                    }
+                }
             }
-
         }
 
         private void newGameToolStripMenuItem_Click(object sender, EventArgs e)
@@ -153,6 +156,7 @@ namespace TheKnight
             RemoveDoor();
 
             scenery.GenerateRandomColors();
+            ColorBoard();
 
             DrawKey();
             DrawDoor(false);
@@ -162,9 +166,6 @@ namespace TheKnight
             RemoveKnight();
             knight.SetPosition(knightSpawn);
             DrawKnight();
-
-
-            gameBoardLayout.Invalidate();
         }
 
         private void exitToolStripMenuItem_Click(object sender, EventArgs e)
@@ -189,13 +190,12 @@ namespace TheKnight
 
         public void RecreateBoard(short newBoardSize)
         {
-            gameBoardLayout.CellPaint -= ColorBoard;
+            gameBoardLayout.Visible = false;
             gameBoardLayout.RowCount = newBoardSize;
             gameBoardLayout.ColumnCount = newBoardSize;
-            gameBoardLayout.CellPaint += ColorBoard;
+            gameBoardLayout.Controls.Clear();
             gameBoardLayout.RowStyles.Clear();
             gameBoardLayout.ColumnStyles.Clear();
-            gameBoardLayout.Controls.Clear();
 
             for (int i = 0; i < newBoardSize; i++)
             {
@@ -207,18 +207,32 @@ namespace TheKnight
             {
                 for (int j = 0; j < newBoardSize; j++)
                 {
-                    gameBoardLayout.Controls.Add(new Panel() { Dock = DockStyle.Fill }, i, j);
+                    gameBoardLayout.Controls.Add(GeneratePictureBox());
                 }
             }
 
             scenery.SetBoardSize(newBoardSize);
-            var knightSpawn = scenery.GetKnightSpawn();
+            ColorBoard();
+            DrawKey();
+            DrawDoor(false);
 
+            var knightSpawn = scenery.GetKnightSpawn();
             RemoveKnight();
             knight.SetPosition(knightSpawn);
             DrawKnight();
+            
+            gameBoardLayout.Visible = true;
+        }
 
-            gameBoardLayout.Invalidate();
+        private PictureBox GeneratePictureBox()
+        {
+            return new PictureBox()
+            {
+                Dock = DockStyle.Fill,
+                BorderStyle = BorderStyle.None,
+                Margin = new Padding(0)
+            };
+
         }
         
         private void DrawKnight()
@@ -227,17 +241,14 @@ namespace TheKnight
             var knightImage = knight.Image;
 
             knightImage.MakeTransparent();
-            cellControl.Anchor = AnchorStyles.None;
-            cellControl.BackgroundImage = knightImage;
-            cellControl.BackgroundImageLayout = ImageLayout.Stretch | ImageLayout.Center;
+            (cellControl as PictureBox).Image = knightImage;
+            (cellControl as PictureBox).SizeMode = PictureBoxSizeMode.StretchImage;
         }
 
         private void RemoveKnight()
         {
             var cellControl = gameBoardLayout.GetControlFromPosition(knight.Position.X, knight.Position.Y);
-            var cellGraphics = cellControl.CreateGraphics();
-
-            cellControl.BackgroundImage = null;
+            (cellControl as PictureBox).Image = null;
         }
 
         private void DrawKey()
@@ -245,48 +256,80 @@ namespace TheKnight
             var keyPosition = scenery.GetKeySpawn();
 
             var cellControl = gameBoardLayout.GetControlFromPosition(keyPosition.X, keyPosition.Y);
-            var cellGraphics = cellControl.CreateGraphics();
-
             var keyImage = Resources.key2;
-
             keyImage.MakeTransparent();
-            cellControl.Anchor = AnchorStyles.None;
-            cellControl.BackgroundImage = keyImage;
-            cellControl.BackgroundImageLayout = ImageLayout.Stretch | ImageLayout.Center;
+            (cellControl as PictureBox).Image = keyImage;
+            (cellControl as PictureBox).SizeMode = PictureBoxSizeMode.StretchImage;
         }
 
         private void RemoveKey()
         {
             var keyPosition = scenery.GetKeySpawn();
             var cellControl = gameBoardLayout.GetControlFromPosition(keyPosition.X, keyPosition.Y);
-            var cellGraphics = cellControl.CreateGraphics();
-
-            cellControl.BackgroundImage = null;
+            (cellControl as PictureBox).Image = null;
         }
 
         private void DrawDoor(bool opened = true)
         {
             var doorPosition = scenery.GetDoorSpawn();
-
             var cellControl = gameBoardLayout.GetControlFromPosition(doorPosition.X, doorPosition.Y);
-            var cellGraphics = cellControl.CreateGraphics();
-
             var doorImage = opened ? Resources.opened_door : Resources.closed_door;
 
             doorImage.MakeTransparent();
-            cellControl.Anchor = AnchorStyles.None;
-            cellControl.BackgroundImage = doorImage;
-            cellControl.BackgroundImageLayout = ImageLayout.Stretch | ImageLayout.Center;
+            (cellControl as PictureBox).Image = doorImage;
+            (cellControl as PictureBox).SizeMode = PictureBoxSizeMode.StretchImage;
+
         }
 
         private void RemoveDoor()
         {
             var doorPosition = scenery.GetDoorSpawn();
-
             var cellControl = gameBoardLayout.GetControlFromPosition(doorPosition.X, doorPosition.Y);
-            var cellGraphics = cellControl.CreateGraphics();
+            (cellControl as PictureBox).Image = null;
+        }
 
-            cellControl.BackgroundImage = null;
+        private void DestroyWalls()
+        {
+            var cellsToDestroy = new List<Tuple<SceneryElement, Position>>();
+
+            cellsToDestroy.Add(GetCellType(knight.Position.X, (short)(knight.Position.Y - 1)));
+            cellsToDestroy.Add(GetCellType((short)(knight.Position.X + 1), knight.Position.Y));
+            cellsToDestroy.Add(GetCellType(knight.Position.X, (short)(knight.Position.Y + 1)));
+            cellsToDestroy.Add(GetCellType((short)(knight.Position.X - 1), knight.Position.Y));
+
+            foreach (var cellToDestroy in cellsToDestroy)
+            {
+                if (cellToDestroy != null)
+                {
+                    if (cellToDestroy.Item2 == scenery.GetKeySpawn() || 
+                        cellToDestroy.Item2 == scenery.GetDoorSpawn())
+                        continue;
+
+                    if (cellToDestroy.Item1 == SceneryElement.Grass)
+                        continue;
+
+                    RemoveWall(cellToDestroy.Item2);
+                }
+            }
+        }
+        
+        private Tuple<SceneryElement, Position> GetCellType(short x, short y)
+        {
+            if (x < 0 || y < 0 || x >= scenery.BoardSize || y >= scenery.BoardSize)
+                return null;
+
+            return Tuple.Create<SceneryElement, Position>(
+                scenery.Board[x, y],
+                new Position(x, y)
+            );
+        }        
+
+        private void RemoveWall(Position position)
+        {
+            scenery.Board[position.X, position.Y] = SceneryElement.Grass;
+            var cellControl = gameBoardLayout.GetControlFromPosition(position.X, position.Y);            
+            cellControl.BackColor = Color.ForestGreen;
+            cellControl.Invalidate();
         }
 
 
