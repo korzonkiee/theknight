@@ -45,19 +45,46 @@ namespace TheKnight
             {
                 for (short j = 0; j < BoardSize; j++)
                 {
-                    var randomSceneryElement = (SceneryElement) sceneryElements.
-                        GetValue(random.Next(sceneryElements.Length));
-
-                    if (randomSceneryElement == SceneryElement.Grass)
-                        availablePositions.Add(new Position(i, j));
-
-                    Board[i, j] = randomSceneryElement;
+                    if (HasWallNeighbour(i, j))
+                    {
+                        if (random.Next(2) == 0)
+                            Board[i, j] = SceneryElement.Wall;
+                        else
+                        {
+                            Board[i, j] = SceneryElement.Grass;
+                            availablePositions.Add(new Position(i, j));
+                        }
+                    }
+                    else
+                    {
+                        if (random.Next(5) == 0)
+                            Board[i, j] = SceneryElement.Wall;
+                        else
+                        {
+                            Board[i, j] = SceneryElement.Grass;
+                            availablePositions.Add(new Position(i, j));
+                        }
+                    }
                 }
             }
 
             ApplyRandomPosition(ref KnightSpawn);
             ApplyRandomPosition(ref KeySpawn);
             ApplyRandomPosition(ref DoorSpawn);
+        }
+
+        private bool HasWallNeighbour(int x, int y)
+        {
+            if (x < 0 || y < 0 || x >= BoardSize || y >= BoardSize)
+            {
+                if (Board[x + 1, y] == SceneryElement.Wall ||
+                    Board[x - 1, y] == SceneryElement.Wall ||
+                    Board[x, y + 1] == SceneryElement.Wall ||
+                    Board[x, y - 1] == SceneryElement.Wall)
+                    return true;
+            }
+
+            return false;
         }
 
         public Position GetKnightSpawn()
@@ -73,6 +100,21 @@ namespace TheKnight
         public Position GetDoorSpawn()
         {
             return DoorSpawn;
+        }
+        
+        public void SetDoorSpawn(Position position)
+        {
+            DoorSpawn = position;
+        }
+
+        public void SetKnightSpawn(Position position)
+        {
+            KnightSpawn = position;
+        }
+
+        public void SetKeySpawn(Position position)
+        {
+            KeySpawn = position;
         }
 
         public bool NotAvailablePosition(Position position)

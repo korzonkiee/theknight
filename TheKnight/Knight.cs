@@ -16,6 +16,8 @@ namespace TheKnight
 
         public bool HasKey { get; set; } = false;
 
+        public Walk lastWalk { get; set; }
+
         public Knight()
         {
             Image = Resources.knight_right;
@@ -31,6 +33,7 @@ namespace TheKnight
         public void SetPosition(Position position, Walk walk = Walk.None)
         {
             Position = position;
+            lastWalk = walk;
 
             switch (walk)
             {
@@ -96,6 +99,14 @@ namespace TheKnight
         public static bool operator !=(Position p1, Position p2)
         {
             return p1.X != p2.X || p1.Y != p2.Y;
+        }
+    }
+
+    public static class PositionExtensions
+    {
+        public static Point ToPoint(this Position position)
+        {
+            return new Point(position.X, position.Y);
         }
     }
 }

@@ -33,6 +33,10 @@
             this.newGameToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.settingsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.exitToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.editModeToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.leftClickToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.wallToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.grassToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.gameBoardLayout = new System.Windows.Forms.TableLayoutPanel();
             this.menuStrip1.SuspendLayout();
             this.SuspendLayout();
@@ -41,7 +45,9 @@
             // 
             this.menuStrip1.ImageScalingSize = new System.Drawing.Size(24, 24);
             this.menuStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.fileToolStripMenuItem});
+            this.fileToolStripMenuItem,
+            this.editModeToolStripMenuItem,
+            this.leftClickToolStripMenuItem});
             this.menuStrip1.Location = new System.Drawing.Point(0, 0);
             this.menuStrip1.Name = "menuStrip1";
             this.menuStrip1.Padding = new System.Windows.Forms.Padding(9, 3, 0, 3);
@@ -80,6 +86,39 @@
             this.exitToolStripMenuItem.Size = new System.Drawing.Size(246, 30);
             this.exitToolStripMenuItem.Text = "Exit";
             this.exitToolStripMenuItem.Click += new System.EventHandler(this.exitToolStripMenuItem_Click);
+            // 
+            // editModeToolStripMenuItem
+            // 
+            this.editModeToolStripMenuItem.Name = "editModeToolStripMenuItem";
+            this.editModeToolStripMenuItem.Size = new System.Drawing.Size(106, 29);
+            this.editModeToolStripMenuItem.Text = "Edit mode";
+            this.editModeToolStripMenuItem.Click += new System.EventHandler(this.editModeToolStripMenuItem_Click);
+            // 
+            // leftClickToolStripMenuItem
+            // 
+            this.leftClickToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.wallToolStripMenuItem,
+            this.grassToolStripMenuItem});
+            this.leftClickToolStripMenuItem.Name = "leftClickToolStripMenuItem";
+            this.leftClickToolStripMenuItem.Size = new System.Drawing.Size(91, 29);
+            this.leftClickToolStripMenuItem.Text = "Left click";
+            this.leftClickToolStripMenuItem.Visible = false;
+            // 
+            // wallToolStripMenuItem
+            // 
+            this.wallToolStripMenuItem.Checked = true;
+            this.wallToolStripMenuItem.CheckState = System.Windows.Forms.CheckState.Checked;
+            this.wallToolStripMenuItem.Name = "wallToolStripMenuItem";
+            this.wallToolStripMenuItem.Size = new System.Drawing.Size(211, 30);
+            this.wallToolStripMenuItem.Text = "Wall";
+            this.wallToolStripMenuItem.Click += new System.EventHandler(this.wallToolStripMenuItem_Click);
+            // 
+            // grassToolStripMenuItem
+            // 
+            this.grassToolStripMenuItem.Name = "grassToolStripMenuItem";
+            this.grassToolStripMenuItem.Size = new System.Drawing.Size(211, 30);
+            this.grassToolStripMenuItem.Text = "Grass";
+            this.grassToolStripMenuItem.Click += new System.EventHandler(this.grassToolStripMenuItem_Click);
             // 
             // gameBoardLayout
             // 
@@ -134,6 +173,10 @@
         private System.Windows.Forms.ToolStripMenuItem settingsToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem exitToolStripMenuItem;
         private System.Windows.Forms.TableLayoutPanel gameBoardLayout;
+        private System.Windows.Forms.ToolStripMenuItem editModeToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem leftClickToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem wallToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem grassToolStripMenuItem;
     }
 }
 

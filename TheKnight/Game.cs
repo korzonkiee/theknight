@@ -18,6 +18,10 @@ namespace TheKnight
         private Knight knight;
         private SplashScreen splashScreen;
 
+        private bool EditMode = false;
+        private List<PictureBox> PictureBoxes;
+        private PictureBox selectedPictureBox;
+
         public Game()
         {
             HandleSplashScreen();
@@ -33,7 +37,8 @@ namespace TheKnight
             this.MaximizeBox = true;
             this.MinimizeBox = true;
             this.CenterToScreen();
-            
+
+            PictureBoxes = new List<PictureBox>();
             scenery = new Scenery();
             var knightSpawn = scenery.GetKnightSpawn();
             knight = new Knight(knightSpawn);
@@ -196,6 +201,7 @@ namespace TheKnight
             gameBoardLayout.Controls.Clear();
             gameBoardLayout.RowStyles.Clear();
             gameBoardLayout.ColumnStyles.Clear();
+            PictureBoxes.Clear();
 
             for (int i = 0; i < newBoardSize; i++)
             {
@@ -203,11 +209,14 @@ namespace TheKnight
                 gameBoardLayout.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100 / newBoardSize));
             }
 
-            for (int i = 0; i < newBoardSize; i++)
+            for (short i = 0; i < newBoardSize; i++)
             {
-                for (int j = 0; j < newBoardSize; j++)
+                for (short j = 0; j < newBoardSize; j++)
                 {
-                    gameBoardLayout.Controls.Add(GeneratePictureBox());
+                    var pictureBox = GeneratePictureBox();
+                    pictureBox.Tag = new Position(j, i);
+                    gameBoardLayout.Controls.Add(pictureBox);
+                    PictureBoxes.Add(pictureBox);
                 }
             }
 
@@ -366,6 +375,135 @@ namespace TheKnight
             if (position == doorSpawn && knight.HasKey)
                 return true;
             return false;
+        }
+
+        private void editModeToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            if (!EditMode)
+            {
+                foreach (var pictureBox in PictureBoxes)
+                {
+                    pictureBox.Click += pictureBox_Click;
+                }
+                EditMode = true;
+                var menuItem = (ToolStripItem)sender;
+                menuItem.Text = "&Game mode";
+                leftClickToolStripMenuItem.Visible = true;
+                menuStrip1.BackColor = Color.LightYellow;
+            }
+            else
+            {
+                foreach (var pictureBox in PictureBoxes)
+                {
+                    pictureBox.Click -= pictureBox_Click;
+                }
+
+                EditMode = false;
+                var menuItem = (ToolStripItem)sender;
+                menuItem.Text = "&Edit mode";
+                leftClickToolStripMenuItem.Visible = false;
+                menuStrip1.BackColor = Control.DefaultBackColor;
+            }
+        }
+
+        private void pictureBox_Click(object sender, EventArgs e)
+        {
+            MouseEventArgs mouse = e as MouseEventArgs;
+            selectedPictureBox = sender as PictureBox;
+            if (mouse.Button == MouseButtons.Left
+                && (Position)selectedPictureBox.Tag != scenery.GetKeySpawn()
+                && (Position)selectedPictureBox.Tag != scenery.GetKnightSpawn()
+                && (Position)selectedPictureBox.Tag != scenery.GetDoorSpawn())
+            {
+                var pos = (Position)selectedPictureBox.Tag;
+                if (grassToolStripMenuItem.Checked)
+                {
+                    selectedPictureBox.BackColor = Color.ForestGreen;
+                    scenery.Board[pos.X, pos.Y] = SceneryElement.Grass;
+                }
+                else if (wallToolStripMenuItem.Checked)
+                {
+                    selectedPictureBox.BackColor = Color.Maroon;
+                    scenery.Board[pos.X, pos.Y] = SceneryElement.Wall;
+                }
+            }
+            if (mouse.Button == MouseButtons.Right)
+            {
+                var contextMenuStrip = new ContextMenuStrip();
+                ToolStripItem door = contextMenuStrip.Items.Add("Door");
+                door.Click += new EventHandler(door_Click);
+                ToolStripItem knight = contextMenuStrip.Items.Add("Knight");
+                knight.Click += new EventHandler(knight_Click);
+                ToolStripItem key = contextMenuStrip.Items.Add("Key");
+                key.Click += new EventHandler(key_Click);
+                contextMenuStrip.Show(Cursor.Position);
+            }
+        }
+
+        void door_Click(object sender, EventArgs e)
+        {
+            ToolStripItem clickedItem = sender as ToolStripItem;
+            if ((Position)selectedPictureBox.Tag != scenery.GetKnightSpawn()
+                && (Position)selectedPictureBox.Tag != scenery.GetKeySpawn()
+                && (Position)selectedPictureBox.Tag != scenery.GetDoorSpawn())
+            {
+                PictureBox previousBox = (PictureBox)gameBoardLayout.GetControlFromPosition(scenery.GetDoorSpawn().X, scenery.GetDoorSpawn().Y);
+                previousBox.Image = null;
+                selectedPictureBox.BackColor = Color.ForestGreen;
+                var image = (knight.HasKey ? Resources.opened_door : Resources.closed_door);
+                image.MakeTransparent();
+                selectedPictureBox.Image = image;
+                selectedPictureBox.SizeMode = PictureBoxSizeMode.StretchImage;
+                scenery.SetDoorSpawn((Position)selectedPictureBox.Tag);
+            }
+        }
+
+        void knight_Click(object sender, EventArgs e)
+        {
+            ToolStripItem clickedItem = sender as ToolStripItem;
+            if ((Position)selectedPictureBox.Tag != scenery.GetKnightSpawn()
+                && (Position)selectedPictureBox.Tag != scenery.GetKeySpawn()
+                && (Position)selectedPictureBox.Tag != scenery.GetDoorSpawn())
+            {
+                PictureBox previousBox = (PictureBox)gameBoardLayout.GetControlFromPosition(knight.Position.X, knight.Position.Y);
+                previousBox.Image = null;
+                selectedPictureBox.BackColor = Color.ForestGreen;
+                var image = (knight.lastWalk == Walk.Left ? Resources.knight_left : Resources.knight_right);
+                image.MakeTransparent();
+                selectedPictureBox.Image = image;
+                selectedPictureBox.SizeMode = PictureBoxSizeMode.StretchImage;
+                knight.SetPosition((Position)selectedPictureBox.Tag, knight.lastWalk);
+            }
+        }
+
+        void key_Click(object sender, EventArgs e)
+        {
+            ToolStripItem clickedItem = sender as ToolStripItem;
+            if ((Position)selectedPictureBox.Tag != scenery.GetKnightSpawn()
+                && (Position)selectedPictureBox.Tag != scenery.GetKeySpawn()
+                && (Position)selectedPictureBox.Tag != scenery.GetDoorSpawn())
+            {
+                PictureBox previousBox = (PictureBox)gameBoardLayout.GetControlFromPosition(scenery.GetKeySpawn().X, scenery.GetKeySpawn().Y);
+                previousBox.Image = null;
+                selectedPictureBox.BackColor = Color.ForestGreen;
+                var image = Resources.key2;
+                image.MakeTransparent();
+                selectedPictureBox.Image = image;
+                selectedPictureBox.SizeMode = PictureBoxSizeMode.StretchImage;
+                scenery.SetKeySpawn((Position)selectedPictureBox.Tag);
+            }
+        }
+
+        private void wallToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            grassToolStripMenuItem.Checked = false;
+            wallToolStripMenuItem.Checked = true;
+        }
+
+        private void grassToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            grassToolStripMenuItem.Checked = true;
+            wallToolStripMenuItem.Checked = false;
         }
     }
 }
