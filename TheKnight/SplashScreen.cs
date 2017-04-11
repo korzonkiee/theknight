@@ -35,6 +35,7 @@ namespace TheKnight
             InitializeComponent();
             Region = System.Drawing.Region.FromHrgn(CreateRoundRectRgn(0, 0, Width, Height, Width, Height));
             BackColor = Color.FromArgb(44, 62, 80);
+            label1.MouseDown += new MouseEventHandler(Splash_MouseDown);
         }
 
         private void Splash_MouseDown(object sender, MouseEventArgs e)
